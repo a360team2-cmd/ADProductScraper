@@ -1,0 +1,183 @@
+/* Comfortable defaults at 100% browser zoom, including laptop and phone layouts. */
+body { font-size: 16px; line-height: 1.5; }
+.brand { font-size: 22px; }
+.brand small { font-size: 10px; letter-spacing: 1.25px; }
+.brand-mark { flex-shrink: 0; }
+.workspace { padding: 14px 10px; }
+.workspace small { font-size: 12px; }
+.nav-item { min-height: 50px; gap: 9px; }
+.nav-label { font-size: 12px; }
+.sidebar-bottom { padding-inline: 8px; }
+.sidebar-bottom strong { font-size: 15px; }
+.sidebar-bottom p, .local-badge { font-size: 13px; }
+.local-badge { white-space: nowrap; }
+.topbar { font-size: 14px; }
+.top-status { font-size: 13px; }
+h1 { font-size: 34px; line-height: 1.25; }
+.page-heading p { font-size: 16px; line-height: 1.6; max-width: 690px; }
+.eyebrow { font-size: 12px; letter-spacing: 1.3px; }
+h2, .section-top h2, .results-heading h2, .welcome h2 { font-size: 21px; }
+.section-top p { font-size: 14px; line-height: 1.5; }
+.step-icon { width: 42px; height: 42px; flex-shrink: 0; font-size: 14px; }
+.button { min-height: 46px; padding: 12px 18px; font-size: 15px; }
+.button.small { min-height: 42px; font-size: 14px; }
+.field-label, .check-label, .page-limit { font-size: 14px; }
+.url-input input { font-size: 16px; padding-block: 15px; }
+.check-label { gap: 12px; }
+.check-label small { font-size: 13px; line-height: 1.5; max-width: 330px; }
+.check-label input { width: 18px; height: 18px; flex-shrink: 0; }
+.page-limit { flex-wrap: wrap; gap: 8px; }
+.page-limit select { font-size: 14px; min-height: 44px; padding: 10px; }
+.source-row { flex-wrap: wrap; gap: 14px; }
+.source-label, .source-note, .market.other { font-size: 12px; }
+.market { font-size: 16px; }
+.source-note { margin-left: 0; }
+.advanced { font-size: 14px; padding-block: 18px; }
+.advanced summary span { font-size: 12px; }
+.selector-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.selector-grid label { font-size: 14px; }
+.selector-grid input { font-size: 15px; min-height: 44px; }
+.included-strip { flex-wrap: wrap; gap: 12px 19px; font-size: 13px; padding-block: 22px; }
+.included-strip b { font-size: 14px; }
+.welcome { min-height: 330px; }
+.welcome p { font-size: 15px; }
+.text-button { font-size: 14px; min-height: 42px; }
+.results-heading { flex-wrap: wrap; }
+.results-heading .eyebrow { font-size: 12px; }
+.result-actions { flex-wrap: wrap; }
+.stats span { font-size: 12px; letter-spacing: .5px; }
+.stats strong { display: block; font-size: 32px; }
+.stats strong small { display: block; font-size: 13px; margin-top: 5px; }
+.stats .status-text { font-size: 24px; }
+.job-message, .warnings { font-size: 14px; line-height: 1.6; }
+table { font-size: 14px; min-width: 860px; }
+th { font-size: 12px; letter-spacing: .7px; padding-block: 17px; }
+td { padding-block: 18px; line-height: 1.5; }
+.product-name { font-size: 15px; }
+.product-name small { font-size: 12px; }
+.image-count { font-size: 12px; }
+.table-footer { font-size: 13px; gap: 15px; }
+.table-footer button { min-width: 38px; min-height: 38px; }
+.table-footer>div { flex-shrink: 0; }
+footer { font-size: 12px; }
+.coverage { font-size: 13px; }
+.history-row { font-size: 15px; }
+.history-row small, .status-badge { font-size: 12px; }
+.history-empty { font-size: 15px; }
+@media (max-width: 1150px) {
+  .page-heading { align-items: flex-start; flex-wrap: wrap; }
+  h1 { font-size: 30px; }
+  .url-row { flex-wrap: wrap; }
+  .url-input { flex-basis: 100%; }
+  .options-row { align-items: flex-start; flex-direction: column; }
+  .tag { display: none; }
+}
+@media (max-width: 800px) {
+  h1 { font-size: 28px; }
+  .topbar { font-size: 13px; padding-inline: 18px; }
+  .top-status { font-size: 12px; }
+  .stats span { font-size: 11px; }
+  .stats strong small { font-size: 12px; }
+  .source-row .market { font-size: 15px; }
+  .source-label { font-size: 12px; }
+}
+@media (max-width: 480px) {
+  .top-status { display: none; }
+  .collector { padding-inline: 16px; }
+  .page-heading p, .welcome p { font-size: 15px; }
+  .selector-grid { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: 1fr; gap: 18px; }
+  .stats>div { border: 0; padding: 0; }
+  .stats span { font-size: 12px; }
+  .stats strong { font-size: 28px; margin-top: 4px; }
+  .stats strong small { font-size: 13px; }
+  .table-footer { align-items: flex-start; }
+  .result-actions { width: 100%; }
+  .history-row { flex-wrap: wrap; gap: 10px; }
+}
+
+/* AD Product Scraper: readable forest-green interface. */
+:root { color:#203e32; }
+body { font-size:16px; }
+.sidebar { width:284px; padding:28px 20px; }
+main { margin-left:284px; width:calc(100% - 284px); }
+.brand { gap:12px; letter-spacing:0; margin-bottom:34px; }
+.brand-mark { width:62px; height:66px; border-radius:18px; flex-shrink:0; background:linear-gradient(140deg,#ecfff6d9,#a5dac0b3 65%,#6cae94b8); border:1px solid #ffffff; box-shadow:inset 0 1px 2px #fff, inset 0 -3px 8px #37795a24,0 8px 20px #24563e20; backdrop-filter:blur(12px); }
+.brand-mark img { width:48px; height:48px; filter:drop-shadow(0 3px 3px #285f3f20); }
+.brand-copy { font-size:23px; font-weight:800; line-height:1.2; }
+.brand-copy small { font-size:15px; font-weight:650; letter-spacing:.15px; color:#355846; margin-top:5px; }
+.nav-label { font-size:14px; color:#526b5b; font-weight:700; margin-top:0; }
+.nav-item { font-size:16px; color:#3d5c4b; font-weight:600; min-height:54px; }
+.topbar { font-size:16px; color:#486250; gap:14px; }
+.topbar b { color:#284936; font-weight:650; }
+.top-status,.local-badge,.sidebar-bottom p { font-size:14px; color:#4c6655; }
+.sidebar-bottom strong { font-size:16px; }
+.eyebrow,.results-heading .eyebrow { font-size:14px; color:#41634d; font-weight:700; }
+.page-heading p,.section-top p,.welcome p,.coverage { font-size:16px; color:#4d6555; line-height:1.7; }
+.button,.button.small,.demo-button,.text-button { font-size:16px; font-weight:650; min-height:46px; }
+.secondary,.text-button { color:#28553c; }
+.field-label,.check-label,.page-limit,.page-limit select,.advanced,.selector-grid label { font-size:16px; color:#35543f; }
+.check-label b { font-weight:650; }
+.check-label small { font-size:14px; color:#536958; }
+.source-label,.source-note,.market.other,.advanced summary span,.tag { font-size:14px; color:#526748; }
+.market { opacity:1; }
+.url-input input::placeholder,.selector-grid input::placeholder { color:#637363; opacity:1; }
+.selector-grid input { font-size:16px; color:#294932; }
+.included-strip,.included-strip b { font-size:15px; color:#45603b; }
+.included-strip>span:not(.mini-file):before { color:#37612e; font-weight:800; font-size:16px; }
+.stats span,th { font-size:14px; color:#48613d; font-weight:700; }
+.stats strong small,.product-name small { font-size:14px; color:#52664a; }
+.job-message,.warnings { font-size:16px; }
+.job-message { color:#435e36; }
+.warnings { color:#70591b; }
+table,td,.product-name,.history-row,.history-empty { font-size:16px; color:#36502c; }
+.product-name,.history-row b { font-weight:650; }
+.image-count,.table-footer,.history-row small,.status-badge { font-size:14px; color:#4d6540; }
+footer,footer b { font-size:14px; color:#526649; }
+.ui-icon { width:24px; height:24px; display:inline-block; vertical-align:middle; flex-shrink:0; stroke:currentColor; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.nav-arrow { margin-left:auto; color:#28533b; }
+.url-input>span { color:#34593e; }
+.external { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; color:#285738; border-radius:7px; }
+.external:hover { background:#e6f1e6; }
+.table-footer button { min-width:44px; min-height:44px; color:#31572f; border-color:#a6b79b; }
+button:disabled { opacity:.65; }
+.advanced summary,.warnings summary { list-style:none; font-weight:650; display:flex; align-items:center; gap:9px; }
+.advanced summary::-webkit-details-marker,.warnings summary::-webkit-details-marker { display:none; }
+.advanced summary:before,.warnings summary:before { content:''; width:10px; height:10px; border-right:3px solid currentColor; border-bottom:3px solid currentColor; transform:rotate(-45deg); margin:0 5px 0 2px; flex-shrink:0; }
+details[open]>summary:before { transform:rotate(45deg); }
+.page-limit select { appearance:none; padding-right:38px; background:#fbfcf9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%2335543f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center/20px; }
+.text-button { display:inline-flex; align-items:center; gap:10px; }
+@media(max-width:1150px) { .sidebar { width:270px; padding-inline:16px; } main { margin-left:270px; width:calc(100% - 270px); } .source-note { display:block; } }
+@media(max-width:800px) { main { margin-left:0; width:100%; } .topbar { height:auto; min-height:64px; padding-block:12px; font-size:15px; flex-wrap:wrap; } .top-status { font-size:14px; } .stats span,.stats strong small,.source-label { font-size:14px; } }
+@media(max-width:480px) { .page-heading p,.welcome p { font-size:16px; } .topbar .slash { padding-inline:6px; } .brand-crumb { font-weight:700; } }
+
+
+/* Simple collection navigation and clear interaction states. */
+.nav-item { position:relative; border:1px solid transparent; transition:background-color .18s ease,box-shadow .18s ease,border-color .18s ease,transform .18s ease; }
+.nav-item:hover { background:#e7f3eb; color:#183f2b; border-color:#bbd8c6; box-shadow:0 5px 12px #214c3e12; transform:translateX(3px); }
+.nav-item.active { background:linear-gradient(115deg,#d9eedf,#eef7f0); color:#183f2b; border-color:#b6d3c0; box-shadow:inset 4px 0 #2c714c; font-weight:700; }
+.nav-item.active:hover { background:#d5eadc; box-shadow:inset 4px 0 #2c714c,0 5px 12px #214c3e18; }
+.nav-item:active { transform:translateX(1px); }
+.nav-item:focus-visible,.history-row:focus-visible { outline:3px solid #367a53; outline-offset:3px; }
+.nav-arrow { transition:transform .18s ease; }
+.nav-item:hover .nav-arrow { transform:translate(2px,-2px); }
+.history-row { border-radius:8px; padding-inline:12px; transition:background-color .18s ease,box-shadow .18s ease; }
+.history-row:hover { background:#edf6ef; box-shadow:inset 3px 0 #367a53; }
+.history-row:active { background:#dcecdf; }
+.collection-help { margin:0; padding:16px 0 22px; border-top:1px solid #e6ede7; font-size:14px; line-height:1.7; color:#526b58; }
+@media(prefers-reduced-motion:reduce) { .nav-item,.nav-arrow,.history-row { transition:none; } .nav-item:hover,.nav-item:active,.nav-item:hover .nav-arrow { transform:none; } }
+
+/* Compact single-line branding with a clear glass cover over the icon. */
+.brand { gap:9px; align-items:center; }
+.brand-copy { font-size:18px; line-height:1.25; letter-spacing:-.45px; white-space:nowrap; font-weight:800; }
+.brand-mark { position:relative; isolation:isolate; overflow:hidden; width:36px; height:40px; border-radius:10px; background:rgba(255,255,255,.35); border:1px solid #dce5e0; box-shadow:inset 0 1px 1px #fff,0 3px 8px #203c3010; backdrop-filter:blur(8px); }
+.brand-mark img { width:28px; height:28px; object-fit:contain; filter:drop-shadow(0 1px 1px #203c3020); }
+.brand-mark::after { content:''; position:absolute; inset:0; z-index:1; pointer-events:none; border-radius:inherit; background:linear-gradient(135deg,rgba(255,255,255,.65) 0%,rgba(255,255,255,.12) 44%,transparent 45%,rgba(255,255,255,.08) 100%); box-shadow:inset 0 0 0 1px #ffffff90; }
+
+/* Every collected image is directly accessible, including keyboard navigation. */
+.product-image-links { display:flex; flex-wrap:wrap; gap:8px; min-width:180px; max-width:300px; }
+.product-image-link { display:inline-flex; align-items:center; justify-content:space-between; gap:7px; min-height:44px; padding:8px 10px; border:1px solid #bbd2c1; border-radius:7px; background:#f0f7f2; color:#245536; font-size:14px; font-weight:650; white-space:nowrap; text-decoration:underline; text-underline-offset:3px; transition:background-color .15s ease,border-color .15s ease; }
+.product-image-link .ui-icon { width:18px; height:18px; }
+.product-image-link:hover { background:#dceddf; border-color:#608e6e; }
+.product-image-link:focus-visible { outline:3px solid #367a53; outline-offset:2px; }
+.no-images { font-size:14px; color:#52664a; }

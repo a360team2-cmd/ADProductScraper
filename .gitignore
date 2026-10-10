@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.angular/
+**/dist/
+backend/data/
+backend/wwwroot/
+.runtime/
+*.log
+
+.vs/
+backend/runtime/data/
+backend/tests/diagnostics/live-jobs/

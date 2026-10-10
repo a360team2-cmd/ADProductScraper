@@ -1,0 +1,8 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Angular: install dependencies", "type": "shell", "command": "npm.cmd ci", "problemMatcher": [] },
+    { "label": "Angular: start development server", "type": "shell", "command": "npm.cmd start", "isBackground": true, "problemMatcher": [] },
+    { "label": "Angular: production build", "type": "shell", "command": "npm.cmd run build", "group": "build", "problemMatcher": [] }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "projects": {
+    "ad-product-scraper": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "index": "src/index.html",
+            "tsConfig": "tsconfig.json",
+            "styles": [
+              "src/styles.css",
+              "src/readability.css"
+            ],
+            "outputPath": "dist/ad-product-scraper",
+            "assets": [
+              {
+                "input": "public",
+                "glob": "**/*"
+              }
+            ]
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "all",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "600kB",
+                  "maximumError": "1MB"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "ad-product-scraper:build:development",
+            "proxyConfig": "proxy.conf.json",
+            "host": "localhost",
+            "port": 4200
+          }
+        }
+      }
+    }
+  }
+}

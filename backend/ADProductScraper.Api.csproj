@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);tests/**;runtime/**;docs/**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="1.5.0" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.58.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    <Content Remove="data/**" />
+    <None Remove="data/**" />
+  </ItemGroup>
+</Project>
+
+
