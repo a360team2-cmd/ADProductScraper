@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {AppErrors, api, request, errorMessage} from './errors';
 
 interface Product {title:string;url:string;images:string[];material:string;store:string;price:string;currency:string;sourcePage:string;oldPrice?:string}
-interface Job {id:string;status:string;message:string;created:string;count:number;pages:number;warnings:string[];request:{url:string;demo:boolean;currency?:string}}
+interface Job {id:string;status:string;message:string;created:string;count:number;pages:number;warnings:string[];request:{url:string;demo:boolean;currency?:string;source?:string;keywords?:string;etsyShopId?:number}}
 @Component({
   selector:'app-root', standalone:true, imports:[FormsModule],
   template:`
@@ -24,18 +24,31 @@ interface Job {id:string;status:string;message:string;created:string;count:numbe
         @if(error()){<div class="alert error" role="alert">{{error()}} <button (click)="error.set('')" aria-label="Dismiss error">×</button></div>}
         @if(view()==='collect'){
           <section class="collector panel">
-            <div class="section-top"><div class="step-icon">01</div><div><h2>Add your search link</h2><p>Search on a store, then paste the results page URL below.</p></div><label class="page-limit" style="margin-left:auto">Pages to collect <select name="limit" [(ngModel)]="limit"><option [ngValue]="0">All available pages</option><option [ngValue]="2">First 2 pages (quick test)</option><option [ngValue]="5">First 5 pages</option><option [ngValue]="10">First 10 pages</option><option [ngValue]="50">First 50 pages</option><option [ngValue]="100">First 100 pages</option></select></label></div>
+            <div class="section-top"><div class="step-icon">01</div><div><h2>Start a collection</h2><p>Use a website URL or search Etsy through its official API.</p></div><label class="page-limit" style="margin-left:auto">Pages to collect <select name="limit" [(ngModel)]="limit"><option [ngValue]="0">All available pages</option><option [ngValue]="2">First 2 pages (quick test)</option><option [ngValue]="5">First 5 pages</option><option [ngValue]="10">First 10 pages</option><option [ngValue]="50">First 50 pages</option><option [ngValue]="100">First 100 pages</option></select></label></div>
             <form (ngSubmit)="start(false)">
+              <label class="field-label" for="source">Collection source</label>
+              <select id="source" name="source" [(ngModel)]="source"><option value="website">Website URL</option><option value="etsy">Etsy API</option></select>
+              @if(source==='etsy'){
+                <p>Search public Etsy listings through the official API. App approval is required.</p>
+                @if(etsyConfigured()===false){<p role="status">Etsy credentials are not configured. See the backend Etsy setup guide.</p>}
+                <label class="field-label" for="keywords">Search keywords</label>
+                <input id="keywords" name="keywords" [(ngModel)]="keywords" maxlength="200" placeholder="leather jackets" [required]="!etsyShopId">
+                <label class="field-label" for="etsyShopId">Numeric shop ID (optional)</label>
+                <input id="etsyShopId" name="etsyShopId" type="number" min="1" step="1" [(ngModel)]="etsyShopId" placeholder="Leave blank to search the marketplace">
+                <p>Each page contains up to 100 listings. Prices use the currency provided by Etsy.</p>
+                <button class="button primary" type="submit" [disabled]="busy() || etsyConfigured()===false">{{busy()?'Starting…':'Collect Etsy products'}}</button>
+              }@else{
               <label class="field-label" for="url">Search results or product URL</label>
               <div class="url-row"><div class="url-input"><span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6h12v12"/></svg></span><input id="url" type="url" name="url" [(ngModel)]="url" (ngModelChange)="loadCurrency()" placeholder="https://www.etsy.com/search?q=ceramic+vase" required autocomplete="url"></div><button class="button primary" type="submit" [disabled]="busy()">{{busy()?'Starting…':'Collect products'}} <span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-7-7 7 7-7 7"/></svg></span></button></div>
               <div style="display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap"><label class="page-limit">Website currency <select name="currency" [(ngModel)]="currency" (ngModelChange)="rememberCurrency()"><option value="">Website default / URL</option>@for(code of currencies;track code){<option [value]="code">{{code}}</option>}</select></label><small>Match the currency selected on the store. Your choice is remembered for this website.</small></div>
+              }
             </form>
           </section>
           
         }
         @if(view()==='history'){
           <section class="panel history"><div class="section-top"><h2>Saved collections</h2><span class="tag">{{jobs().length}} COLLECTIONS</span></div>
-          @for(j of jobs();track j.id){<button class="history-row" (click)="select(j.id)"><span><b>{{j.request.demo?'Demo · Home essentials':host(j.request.url)}}</b><small>{{date(j.created)}}</small></span><span>{{j.count}} products</span><span class="status-badge" [class.failed]="j.status==='Failed'">{{j.status}}</span><span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-7-7 7 7-7 7"/></svg></span></button>}@empty{<p class="history-empty">No collections yet. Paste a search link or try the demo to begin.</p>}</section>
+          @for(j of jobs();track j.id){<button class="history-row" (click)="select(j.id)"><span><b>{{j.request.demo?'Demo · Home essentials':j.request.source==='etsy'?'Etsy API · '+(j.request.keywords||'Shop '+j.request.etsyShopId):host(j.request.url)}}</b><small>{{date(j.created)}}</small></span><span>{{j.count}} products</span><span class="status-badge" [class.failed]="j.status==='Failed'">{{j.status}}</span><span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16m-7-7 7 7-7 7"/></svg></span></button>}@empty{<p class="history-empty">No collections yet. Paste a search link or try the demo to begin.</p>}</section>
         }
         @if(current();as job){
           <section class="panel results">
@@ -55,6 +68,7 @@ interface Job {id:string;status:string;message:string;created:string;count:numbe
   </div>`
 })
 class App implements OnDestroy {
+  source='website'; keywords=''; etsyShopId:number|null=null; etsyConfigured=signal<boolean|null>(null);
   url=''; limit=0; currency=''; currencies=['PKR','USD','GBP','EUR','AUD','CAD','AED','INR','SAR','NZD','CHF','JPY','SGD'];
   loadCurrency(){try{const u=new URL(this.url);this.currency=(u.searchParams.get('currency')??u.searchParams.get('currency_code')??localStorage.getItem('catalog.currency.'+u.host)??this.jobs().find(j=>{try{return new URL(j.request.url).host===u.host && !!j.request.currency;}catch{return false;}})?.request.currency??'').toUpperCase();}catch{}}
   rememberCurrency(){try{localStorage.setItem('catalog.currency.'+new URL(this.url).host,this.currency);}catch{}}
@@ -65,11 +79,12 @@ class App implements OnDestroy {
   private timer=setInterval(()=>void this.poll(),1500);
   private onUnhandled=(event:PromiseRejectionEvent)=>{this.errors.handleError(event.reason);event.preventDefault();};
   private onError=(event:ErrorEvent)=>{this.errors.handleError(event.error??event.message);};
-  constructor(){window.addEventListener('unhandledrejection',this.onUnhandled);window.addEventListener('error',this.onError);void this.refresh();}
+  constructor(){window.addEventListener('unhandledrejection',this.onUnhandled);window.addEventListener('error',this.onError);void this.refresh();void this.loadEtsyStatus();}
   ngOnDestroy(){clearInterval(this.timer);window.removeEventListener('unhandledrejection',this.onUnhandled);window.removeEventListener('error',this.onError);}
   api=api;
+  async loadEtsyStatus(){try{this.etsyConfigured.set((await this.api<{configured:boolean}>('/etsy/status')).configured);}catch{this.etsyConfigured.set(null);}}
   async refresh(){try{this.jobs.set(await this.api<Job[]>('/jobs'));}catch(e){this.error.set(this.message(e));}}
-  async start(demo:boolean){if(this.busy())return;this.busy.set(true);this.error.set('');try{const result=await this.api<{id:string}>('/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:this.url,maxPages:this.limit,visitDetails:false,demo,browserMode:!demo,respectRobots:false,currency:demo?'':this.currency})});this.view.set('collect');await this.select(result.id);await this.refresh();}catch(e){this.error.set(this.message(e));}finally{this.busy.set(false);}}
+  async start(demo:boolean){if(this.busy())return;this.busy.set(true);this.error.set('');try{const result=await this.api<{id:string}>('/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:this.url,maxPages:this.limit,visitDetails:false,demo,source:demo?'website':this.source,keywords:this.keywords,etsyShopId:this.source==='etsy'&&!demo?this.etsyShopId:null,browserMode:!demo&&this.source!=='etsy',respectRobots:false,currency:demo||this.source==='etsy'?'':this.currency})});this.view.set('collect');await this.select(result.id);await this.refresh();}catch(e){this.error.set(this.message(e));}finally{this.busy.set(false);}}
   private selection=0;
   async select(id:string){const selection=++this.selection;try{const [job,rows]=await Promise.all([this.api<Job>('/jobs/'+id),this.api<Product[]>('/jobs/'+id+'/products?take=50')]);if(selection===this.selection){this.offset.set(0);this.current.set(job);this.products.set(rows);}}catch(e){this.error.set(this.message(e));}}
   async poll(){if(this.polling||!this.active())return;this.polling=true;try{const id=this.current()!.id;const job=await this.api<Job>('/jobs/'+id);const rows=await this.api<Product[]>('/jobs/'+id+'/products?take=50&skip='+this.offset());if(this.current()?.id===id){this.current.set(job);this.products.set(rows);}if(!this.active())await this.refresh();}catch(e){this.error.set(this.message(e));}finally{this.polling=false;}}

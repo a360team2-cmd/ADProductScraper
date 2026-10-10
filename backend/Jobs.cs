@@ -10,11 +10,12 @@ public sealed class Jobs : BackgroundService
     private readonly Channel<string> queue = Channel.CreateBounded<string>(10);
     private readonly string directory;
     private readonly SafeWeb web;
+    private readonly EtsyClient? etsy;
     private readonly ILogger<Jobs> logger;
     private static readonly JsonSerializerOptions json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
-    public Jobs(IWebHostEnvironment env, SafeWeb web, ILogger<Jobs> logger)
+    public Jobs(IWebHostEnvironment env, SafeWeb web, ILogger<Jobs> logger, EtsyClient? etsy = null)
     {
-        this.web = web; this.logger = logger;
+        this.web = web; this.logger = logger; this.etsy = etsy;
         directory = Path.Combine(env.ContentRootPath, "data"); Directory.CreateDirectory(directory);
         foreach (var file in Directory.EnumerateFiles(directory, "*.json"))
         {
@@ -38,6 +39,17 @@ public sealed class Jobs : BackgroundService
     public string Create(StartRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
+        if (request.Source is not ("website" or "etsy")) throw new ArgumentException("Unknown collection source.");
+        if (request.Source == "etsy")
+        {
+            if (request.Demo) throw new ArgumentException("Demo cannot use Etsy API mode.");
+            var keywords = (request.Keywords ?? "").Trim();
+            if (keywords.Length > 200 || (keywords.Length == 0 && request.EtsyShopId == null)) throw new ArgumentException("Enter Etsy keywords (up to 200 characters) or a numeric shop ID.");
+            if (request.EtsyShopId is <= 0) throw new ArgumentException("Etsy shop ID must be a positive number.");
+            if (etsy == null) throw new JobConflictException("Etsy API is unavailable.");
+            etsy.EnsureConfigured();
+            request = request with { Keywords = keywords, Url = "https://www.etsy.com/search?q=" + Uri.EscapeDataString(keywords), Currency = "", BrowserMode = false, VisitDetails = false };
+        }
         request = request with { Currency = CurrencySelection.Resolve(request.Currency, request.Url) };
         if (request.Currency.Length > 0 && !request.BrowserMode && !request.Demo) throw new ArgumentException("Selecting a website currency requires Browser mode.");
         if (!request.Demo) SafeWeb.Validate(request.Url);
@@ -46,7 +58,7 @@ public sealed class Jobs : BackgroundService
         lock (gate)
         {
             if (jobs.Count >= 1000) throw new ArgumentException("Job history is full. Archive files in backend/data before restarting.");
-            var job = new CrawlJob { Request = request, Cursor = request.Demo ? "https://demo.adproductscraper.test/search?page=1" : request.Url };
+            var job = new CrawlJob { Request = request, Cursor = request.Source == "etsy" ? "0" : request.Demo ? "https://demo.adproductscraper.test/search?page=1" : request.Url };
             Save(job);
             jobs.Add(job.Id, job);
             if (!queue.Writer.TryWrite(job.Id))
@@ -124,7 +136,7 @@ public sealed class Jobs : BackgroundService
             CrawlJob? job; lock (gate) jobs.TryGetValue(id, out job);
             if (job == null) { logger.LogWarning("Skipped missing queued collection {JobId}", id); continue; }
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, job.Cancellation.Token);
-            try { await Crawl(job, linked.Token); }
+            try { if (job.Request.Source == "etsy") await CrawlEtsy(job, linked.Token); else await Crawl(job, linked.Token); }
             catch (OperationCanceledException) when (linked.IsCancellationRequested) { Finish(job, "Cancelled", "Stopped. Collected products are ready for Excel; resume when needed."); }
             catch (Exception e)
             {
@@ -132,6 +144,38 @@ public sealed class Jobs : BackgroundService
                 Finish(job, "Failed", ErrorHandling.CollectionMessage(e), e);
             }
         }
+    }
+    private async Task CrawlEtsy(CrawlJob job, CancellationToken ct)
+    {
+        if (etsy == null) throw new JobConflictException("Etsy API is unavailable.");
+        Update(job, () => { job.Status = "Running"; job.Message = "Fetching listings from Etsy API…"; }, true);
+        var known = job.Products.Select(p => p.Url).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        while (job.Cursor != null)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (job.Request.MaxPages > 0 && job.Visited.Count >= job.Request.MaxPages)
+            { Finish(job, "Limited", "Page limit reached. Download collected Etsy products or start a new search with a higher limit."); return; }
+            if (job.Products.Count >= 100000)
+            { Finish(job, "Limited", "100,000-product limit reached. Narrow the Etsy search."); return; }
+            if (!int.TryParse(job.Cursor, out var offset) || offset < 0) throw new ArgumentException("Invalid saved Etsy page cursor.");
+            var page = await etsy.FetchPage(job.Request.Keywords, job.Request.EtsyShopId, offset, ct);
+            ct.ThrowIfCancellationRequested();
+            var fresh = page.Products.Where(p => known.Add(p.Url)).ToArray();
+            if (page.Returned > 0 && fresh.Length == 0)
+            { Finish(job, "Paused", "Etsy returned a repeated page. Resume to retry, or narrow the search."); return; }
+            Update(job, () =>
+            {
+                job.ExpectedProducts = page.Total;
+                job.Products.AddRange(fresh);
+                if (page.Returned > 0) job.Visited.Add(job.Cursor!);
+                job.Cursor = page.Returned == 0 || offset + page.Returned >= page.Total ? null : (offset + page.Returned).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                job.Message = $"Collected {job.Products.Count} Etsy products across {job.Visited.Count} pages.";
+            }, true);
+            if (page.Returned == 0 && offset < page.Total)
+            { Finish(job, "Limited", "Etsy stopped returning results before its reported total. This is a partial export; narrow the search."); return; }
+        }
+        Warn(job, "Etsy results can change during pagination. API results may differ from the website; review collected products before using the export.");
+        Finish(job, "Completed", $"Finished available Etsy API results: {job.Products.Count} unique products.");
     }
     private async Task Crawl(CrawlJob job, CancellationToken ct)
     {

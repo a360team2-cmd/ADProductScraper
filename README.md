@@ -192,6 +192,10 @@ The application does not automatically solve CAPTCHA or guarantee access to prot
 | A website returns no products or stops collection | Review job warnings, try browser mode or custom selectors, and confirm the page is accessible. |
 | Changes do not appear when using `Run.cmd` | Run the current source through Visual Studio and VS Code, or use `Start.cmd`. |
 
+## Etsy API setup
+
+Select **Etsy API** in the collector to search public listings by keyword or numeric shop ID. Configure backend User Secrets first; an approved Etsy app is required for live access. See the [Etsy API integration guide](backend/docs/ETSY-API.md) for setup and offline checks.
+
 ## Additional documentation
 
 - [Development setup](backend/docs/DEVELOPMENT-SETUP.md)

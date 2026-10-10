@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace ADProductScraper.Api;
 
 public record Selectors(string Card = "", string Title = "", string Link = "", string Image = "", string Price = "", string Store = "", string Material = "", string Next = "");
-public record StartRequest(string Url, int MaxPages = 0, bool VisitDetails = true, Selectors? Selectors = null, bool Demo = false, bool BrowserMode = false, bool RespectRobots = true, string Currency = "");
+public record StartRequest(string Url, int MaxPages = 0, bool VisitDetails = true, Selectors? Selectors = null, bool Demo = false, bool BrowserMode = false, bool RespectRobots = true, string Currency = "", string Source = "website", string Keywords = "", long? EtsyShopId = null);
 public record Product(string Title, string Url, string[] Images, string Material, string Store, string Price, string Currency, string SourcePage, string OldPrice = "");
 public class CrawlJob
 {

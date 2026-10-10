@@ -15,6 +15,7 @@ builder.Services.AddSwaggerGen(options => options.SwaggerDoc("v1", new Microsoft
 }));
 builder.Services.Configure<HostOptions>(o => o.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);
 builder.Services.AddSingleton<SafeWeb>();
+builder.Services.AddSingleton<EtsyClient>();
 builder.Services.AddSingleton<Jobs>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<Jobs>());
 var app = builder.Build();
@@ -50,6 +51,7 @@ else
     app.UseStaticFiles();
 }
 app.MapGet("/api/health", () => new { status = "ok" });
+app.MapGet("/api/etsy/status", (EtsyClient etsy) => new { configured = etsy.Configured });
 app.MapGet("/api/jobs", (Jobs jobs) => jobs.List());
 app.MapPost("/api/jobs", (StartRequest request, Jobs jobs) => Results.Ok(new { id = jobs.Create(request) }));
 app.MapGet("/api/jobs/{id}", (string id, Jobs jobs) => jobs.Get(id) is { } job ? Results.Ok(job) : Results.NotFound());

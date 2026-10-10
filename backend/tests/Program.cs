@@ -2,6 +2,7 @@ using ADProductScraper.Api;
 using ClosedXML.Excel;
 using System.Net;
 
+if (args.Contains("--etsy-only")) { await EtsyChecks.Run(); return; }
 if (args.Contains("--errors-only")) { await ErrorHandlingChecks.Run(); return; }
 var passed = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception("FAIL: " + name); Console.WriteLine("PASS: " + name); passed++; }
