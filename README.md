@@ -1,97 +1,201 @@
 # AD Product Scraper
 
-A local .NET 9 + Angular 21 product collector. Paste a search-results URL, follow discoverable pagination, enrich products from their detail pages, and download **Excel (.xlsx) only**.
+A local product collection application built with Angular and ASP.NET Core. Collect product information from public ecommerce pages, review results, and export structured Excel workbooks.
 
-## VS Code + Visual Studio (recommended development workflow)
+## Features
 
-Read **[DEVELOPMENT-SETUP.md](backend/docs/DEVELOPMENT-SETUP.md)** for complete Roman Urdu instructions.
+- Extract product titles, prices, currencies, materials, seller names, product URLs, and image links.
+- Parse structured product data and HTML cards with marketplace presets and custom CSS selectors.
+- Follow discoverable pagination, remove duplicate products, and optionally visit product detail pages.
+- Render JavaScript pages through an optional browser collection mode.
+- Monitor collection progress, cancel jobs, and resume interrupted collections from local checkpoints.
+- Export `.xlsx` workbooks with product data, image links, filters, and frozen headers.
+- Try the workflow with synthetic local demo data before collecting live pages.
 
-- **Visual Studio:** open `backend/AD Product Scraper.sln`, select `ADProductScraper.Api`, press F5. API: `http://localhost:5080/api/health`.
-- **VS Code:** open `frontend`, run `npm.cmd ci` once, then `npm.cmd start`. Website: `http://localhost:4200`.
-- The Angular development server proxies `/api` to the backend. Both applications must remain running.
-- Stop any old Run.cmd server before starting the backend to free port 5080.
-- Larger 14–16px normal text, larger controls and table rows are included; use 100% browser zoom.
+## Technology stack
 
-## Jaldi start karein
+| Layer | Technologies |
+| --- | --- |
+| Frontend | Angular 21, TypeScript, CSS |
+| Backend | .NET 9, ASP.NET Core Minimal APIs |
+| HTML parsing | AngleSharp |
+| Browser automation | Microsoft Playwright |
+| Excel export | ClosedXML |
+| API documentation | Swagger / OpenAPI |
+| Persistence | Local JSON checkpoints |
 
-1. .NET 9 ASP.NET Core Runtime ya .NET 9 SDK install ho.
-2. **`Run.cmd` double-click karein.** Ready-to-run build included hai; Node.js ki zaroorat nahin.
-3. Browser mein `http://127.0.0.1:5080` kholein.
-4. **Try a demo** se sample collection check karein, ya website ka search-results link paste karein.
-5. **Collect products** click karein. **Download Excel** se `.xlsx` milegi.
+## Prerequisites
 
-Server window khuli rakhein; Ctrl+C se band hota hai. Source se rebuild karna ho to .NET 9 SDK + Node.js 22.12+ (22.x) ke saath `Start.cmd` chalayein; pehli build ke liye internet chahiye. `Run.cmd` packaged build chalata hai; source changes check karne ke liye `Start.cmd` use karein.
+- .NET 9 SDK.
+- Node.js 22.12 or later in the 22.x release line, with npm.
+- Visual Studio with the ASP.NET and web development workload and .NET 9 support.
+- Visual Studio Code for frontend development.
+- Microsoft Edge or Google Chrome for browser collection mode.
+- Internet access for the initial dependency installation and live collection.
 
-## What works
+## Local development
 
-- Automatic extraction from Product/Offer/ItemList JSON-LD and common HTML cards.
-- HTML selector presets for Amazon, Etsy and eBay, plus generic store cards and optional custom CSS selectors.
-- Automatic `next` links, relative URL resolution, duplicate removal, and loop detection.
-- Product detail visits for published material, seller, price and image URLs.
-- Live counts, 50-row preview pages, queued collections, cancellation, saved history and resume.
-- Atomic local checkpoints in `data` beside the running application (`backend/runtime/data` for Run.cmd, `backend/data` for source mode); interrupted jobs can resume after a restart.
-- Excel has **Products**, **All image links**, and **Read me** sheets, with filters and frozen headers.
-- Columns: title, material, store name, price, currency, product URL, source page, and image URL columns.
-- Prices remain source text, retaining symbols/ranges. They are not normalized or currency-converted.
-- Unavailable values stay blank. Brands are not silently substituted for seller names.
-- Excel output keeps scraped text as text, never as spreadsheet formulas.
+Run the backend in Visual Studio and the frontend in VS Code. Keep both processes running.
 
-## Coverage and limitations — please read
+### 1. Start the backend in Visual Studio
 
-This is a working **HTML-based collector**, not a guaranteed universal marketplace scraper. It does not execute page JavaScript or solve CAPTCHA, log in, bypass access challenges, or use a proxy service. Amazon, Etsy and eBay often restrict automated traffic. Their presets have been tested against representative HTML fixtures, **not certified against live marketplace pages**. Store layouts can change; use custom selectors or add an authorized API integration when required. No marketplace API credentials are included.
+1. Open `backend/AD Product Scraper.sln`.
+2. Set `ADProductScraper.Api` as the startup project.
+3. Select the `ADProductScraper.Api` launch profile.
+4. Press **F5** to restore packages, build, and start the API.
 
-“All discoverable pages” means pages reachable through an actual next-page link in accessible HTML. Infinite scroll, JavaScript buttons and server-hidden results are not included. A single-product URL collects that product; it cannot enumerate an entire store. No keyword search across all marketplaces is implemented: search on the chosen site first and paste its resulting URL.
+Swagger: <http://localhost:5080/swagger>
 
-Access errors stop collection and retain partial data. Download Excel is available as soon as at least one product is collected. Resume retries the unfinished page, deduplicating existing products. Product detail visits are slower (at least 1.5 seconds between live requests) but improve material/store coverage. A user-selected page limit or 100,000-product safety limit makes the result partial. Jobs run one at a time, with up to 10 waiting. There is no login/authentication or multi-user deployment setup; this app binds to localhost only.
+Health check: <http://localhost:5080/api/health>
 
-Robots rules are checked before page collection. Public HTTP/HTTPS addresses on standard ports are allowed; local/private network addresses and cross-site navigation are blocked. DNS checks happen at socket connection time. Pages are limited to 8 MB and requests to 35 seconds.
-
-Demo mode uses **synthetic, local HTML fixtures**, not live Etsy/Amazon/eBay data. Sample image links are placeholders. Internal progress is stored as JSON; the user-facing download is exclusively `.xlsx`.
-
-## Developer commands
+To start the same backend from the project root in a terminal:
 
 ```powershell
-# Backend
-dotnet run --project backend/ADProductScraper.Api.csproj --no-launch-profile
-
-# Angular development server, separate terminal
-cd frontend
-npm ci
-npm start
-# Open http://localhost:4200 (API requests are proxied to :5080)
-
-# Regression checks (from project root)
-dotnet run --project backend/tests/ADProductScraper.Tests.csproj
-
-# With backend running: pagination, cancellation/resume and Excel API checks
-powershell -ExecutionPolicy Bypass -File backend/tests/Smoke.ps1
+dotnet run --project backend/ADProductScraper.Api.csproj --launch-profile ADProductScraper.Api
 ```
 
-The production Angular build is copied to `backend/wwwroot` by Start.ps1 and served by .NET on port 5080. Keep `package-lock.json` for reproducible installs.
+### 2. Start the frontend in VS Code
 
-## Project map
+Open the `frontend` folder in VS Code, then run:
 
-- `backend/Extractor.cs`: structured data, marketplace selectors, detail parsing and link normalization.
-- `backend/SafeWeb.cs`: bounded HTTP fetches, connection-time address validation and robots matching.
-- `backend/Jobs.cs`: single-worker queue, pagination, progress, checkpoint/resume.
-- `backend/ExcelExport.cs`: `.xlsx` generation using ClosedXML.
-- `frontend/src/main.ts`: Angular collection dashboard.
-- `backend/tests/Program.cs`: executable regression suite, including Excel round-trip verification.
+```powershell
+npm install
+npx ng serve
+```
 
-## Reference documentation
+Open <http://localhost:4200>.
 
-- Angular compatibility: https://angular.dev/reference/versions
-- AngleSharp: https://github.com/AngleSharp/AngleSharp
-- ClosedXML: https://docs.closedxml.io/
-- eBay Browse API (possible future authorized integration): https://developer.ebay.com/api-docs/buy/browse/overview.html
+Install dependencies on first setup and after dependency changes. On subsequent runs, use `npx ng serve`. The Angular development server proxies `/api` requests to the backend on port `5080`.
 
-## Folder structure
+If PowerShell blocks npm or npx scripts, use `npm.cmd install` and `npx.cmd ng serve`. For a clean installation using the exact lockfile versions, use `npm ci`.
 
-- `frontend/`: Angular website source, configuration and frontend tests.
-- `backend/`: .NET API source and configuration.
-- `backend/tests/`: regression tests and optional diagnostics (including saved diagnostic exports).
-- `backend/runtime/`: packaged application used by `Run.cmd`; its DLLs are required dependencies.
-- `backend/docs/`: detailed setup, feature and verification notes.
-- Root: README and startup scripts; the Visual Studio solution is inside `backend/`.
+### Local addresses
 
-Run commands from this folder. `Run.cmd` starts the packaged app. `Start.cmd` installs frontend dependencies, builds the current source and starts it. For separate development servers, run `dotnet run --project backend/ADProductScraper.Api.csproj` and run `npm ci` then `npm start` inside `frontend`.
+| Service | Address |
+| --- | --- |
+| Angular application | <http://localhost:4200> |
+| Backend health check | <http://localhost:5080/api/health> |
+| Swagger UI | <http://localhost:5080/swagger> |
+| OpenAPI document | <http://localhost:5080/swagger/v1/swagger.json> |
+
+Swagger is enabled by the Development launch profile. Stop any server started by `Run.cmd` or `Start.cmd` before starting the backend in Visual Studio, since they use the same port.
+
+## Collecting products
+
+1. Open the frontend and paste a public product or collection URL.
+2. Set a page limit and choose whether to visit product detail pages.
+3. Enable browser mode when the website requires JavaScript rendering. Select a supported currency option if needed; the application does not perform exchange-rate conversion.
+4. Start collection and review progress, warnings, and preview rows.
+5. Download the Excel workbook when products are available. If collection stops, review the error and resume when appropriate.
+
+Browser mode may open a separate browser window. Complete any supported manual verification yourself and keep that window open during collection.
+
+## Project structure
+
+```text
+ADProductScraper/
+|-- frontend/                  Angular source, configuration, and frontend tests
+|-- backend/
+|   |-- AD Product Scraper.sln Visual Studio solution
+|   |-- *.cs                   API, extraction, collection, and export logic
+|   |-- Properties/            Development launch profiles
+|   |-- tests/                 Regression checks, fixtures, and diagnostics
+|   |-- docs/                  Detailed setup and feature notes
+|   |-- runtime/               Packaged application used by Run.cmd
+|   `-- data/                  Local checkpoints created at runtime
+|-- README.md
+|-- Run.cmd                    Start the packaged application
+|-- Start.cmd                  Build and run the current source
+`-- Start.ps1                  Build and startup implementation
+```
+
+Build outputs, installed dependencies, and local job checkpoints are excluded from Git where configured in `.gitignore`.
+
+## Build and alternate startup
+
+From the project root on Windows:
+
+```powershell
+.\Start.cmd
+```
+
+This installs frontend dependencies using `npm ci`, builds Angular, copies the generated frontend into `backend/wwwroot`, builds the backend, and starts the application at <http://127.0.0.1:5080>.
+
+To run the included packaged application:
+
+```powershell
+.\Run.cmd
+```
+
+The packaged application requires the .NET 9 ASP.NET Core Runtime or SDK. It runs the bundle in `backend/runtime`; source changes are picked up by the development workflow or a source build, rather than automatically updating that bundle.
+
+## Verification
+
+Run these commands from the project root.
+
+```powershell
+# Backend regression suite
+dotnet run --project backend/tests/ADProductScraper.Tests.csproj
+
+# API smoke checks, with the backend already running
+powershell -ExecutionPolicy Bypass -File backend/tests/Smoke.ps1
+
+# Frontend error-handling checks, after installing frontend dependencies
+node frontend/tests/api-errors.mjs
+
+# Frontend production build
+cd frontend
+npm run build
+```
+
+The regression suite covers extraction, pagination, deduplication, network address restrictions, and Excel output. Additional scenarios are documented in [verification notes](backend/docs/VERIFICATION.md).
+
+## API overview
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/health` | Check API availability |
+| GET | `/api/jobs` | List collection jobs |
+| POST | `/api/jobs` | Create a collection |
+| GET | `/api/jobs/{id}` | Read job status |
+| GET | `/api/jobs/{id}/products` | Read collected products; supports `skip` and `take` |
+| POST | `/api/jobs/{id}/cancel` | Stop a collection |
+| POST | `/api/jobs/{id}/resume` | Resume a collection |
+| GET | `/api/jobs/{id}/excel` | Download an Excel workbook |
+
+Use Swagger in Development for request schemas and interactive examples.
+
+## Data and operational limits
+
+- Source-mode checkpoints are stored in `backend/data`; packaged-mode checkpoints are stored in `backend/runtime/data`.
+- Retain checkpoints if you need saved history or resume support. Keep an independent copy of important Excel exports.
+- Missing product fields remain blank. Prices retain source information; selecting a website currency does not convert values locally.
+- Excel exports protect collected text from being interpreted as formulas.
+- Public HTTP and HTTPS collection is supported; private network targets are blocked.
+- The application is intended for local use and does not provide user accounts or multi-user deployment controls.
+
+## Collection limitations
+
+Collection depends on accessible page content and supported pagination patterns. Marketplace presets and browser rendering do not guarantee compatibility with every website. Layout changes, access restrictions, login requirements, and unsupported infinite-scroll behavior can limit results.
+
+The application does not automatically solve CAPTCHA or guarantee access to protected pages. Robots handling is configurable; access denials and collection warnings should be reviewed. Demo results are synthetic fixtures rather than live marketplace data. Collect only content you are authorized to access.
+
+## Troubleshooting
+
+| Problem | Action |
+| --- | --- |
+| Port `5080` is already in use | Stop another backend or a server started by the root scripts. |
+| Frontend cannot reach the API | Confirm the backend is running and its health endpoint responds. |
+| `ng` is not recognized | Run `npm install`, then use `npx ng serve` in `frontend`. |
+| PowerShell blocks npm scripts | Use the `.cmd` commands shown in the development instructions. |
+| Swagger does not appear | Select the `ADProductScraper.Api` Development launch profile. |
+| A website returns no products or stops collection | Review job warnings, try browser mode or custom selectors, and confirm the page is accessible. |
+| Changes do not appear when using `Run.cmd` | Run the current source through Visual Studio and VS Code, or use `Start.cmd`. |
+
+## Additional documentation
+
+- [Development setup](backend/docs/DEVELOPMENT-SETUP.md)
+- [Separate frontend and backend workflow](backend/docs/NORMAL-RUN.md)
+- [Browser collection](backend/docs/BROWSER-COLLECTION.md)
+- [Error handling](backend/docs/ERROR-HANDLING.md)
+- [Pagination verification](backend/docs/EBAY-PAGINATION-VERIFICATION.md)
